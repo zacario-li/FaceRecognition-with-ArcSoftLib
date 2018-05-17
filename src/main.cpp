@@ -19,6 +19,8 @@ int main(int argc, char* argv[]) {
     {
         Mat tt = imread("test.jpg");
         result = face_instance.GetFaceIDScore(tt);
+        vector<string> names = face_instance.GetFileNameVec();
+        cout<<"match the face :"<<names.at(result.idx)<<endl;
     }
     //5th release the engine
     face_instance.Stop();

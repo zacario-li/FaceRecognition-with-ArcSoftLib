@@ -60,9 +60,9 @@ int ArcsoftFace::BuildFeatureList(string path)
         return -1;
     }
     //3rd retrive face xy
-    ret = _get_faces_infos(hEngine_FD,rdstAsvImgVec,rfacesResultVec);
+    ret = _get_faces_infos(hEngine_FD,rdstAsvImgVec,rFaceInfoVec);
     //4th extract features
-    ret = _get_faces_features(hEngine_FR,rdstAsvImgVec,rfacesResultVec,rfaceModelsVec);
+    ret = _get_faces_features(hEngine_FR,rdstAsvImgVec,rFaceInfoVec,rfaceModelsVec);
 
     return ret;
 }
@@ -79,7 +79,7 @@ face_idx_score ArcsoftFace::GetFaceIDScore(Mat& img)
     vector<ASVLOFFSCREEN>& rTargetAsv = targetAsv;
     targetMat.push_back(img);
     LPAFD_FSDK_FACERES tempFaceResult;
-    LPAFD_FSDK_FACERES& rFaceResult = tempFaceResult;
+    LPAFD_FSDK_FACERES& rtempFaceResult = tempFaceResult;
 
     AFR_FSDK_FACEINPUT faceXy;
     AFR_FSDK_FACEMODEL tempLocalFaceModels = { 0 }, targetFaceModels = {0};
@@ -87,7 +87,7 @@ face_idx_score ArcsoftFace::GetFaceIDScore(Mat& img)
 
     _convert_mat_to_asvl(rTargetMat,rTargetAsv);
     _get_face_info(hEngine_FD,&(rTargetAsv.at(0)),&tempFaceResult);
-    int idx = _get_the_biggest_face_idx(rFaceResult);
+    int idx = _get_the_biggest_face_idx(rtempFaceResult);
 
     faceXy.lOrient = AFR_FSDK_FOC_0;
     faceXy.rcFace.left = tempFaceResult->rcFace[idx].left;
@@ -231,14 +231,22 @@ int ArcsoftFace::_get_face_info(MHandle h,ASVLOFFSCREEN* pImg,LPAFD_FSDK_FACERES
 }
 int ArcsoftFace::_get_faces_infos(MHandle h,
                                 vector<ASVLOFFSCREEN>& imgs,
-                                vector<LPAFD_FSDK_FACERES>& results)
+                                vector<face_xy>& results)
 {
     int ret = 0;
     for(int i=0; i<imgs.size(); i++)
     {
         LPAFD_FSDK_FACERES faceResult;
+        LPAFD_FSDK_FACERES& rfaceResult = faceResult;
+        face_xy xypoint;
+        int index = 0;
         ret = _get_face_info(h,&(imgs.at(i)),&faceResult);
-        results.push_back(faceResult);
+        index = _get_the_biggest_face_idx(rfaceResult);
+        xypoint.top = faceResult->rcFace[index].top;
+        xypoint.left = faceResult->rcFace[index].left;
+        xypoint.bottom = faceResult->rcFace[index].bottom;
+        xypoint.right = faceResult->rcFace[index].right;
+        results.push_back(xypoint);
     }
     return ret;
 }
@@ -252,21 +260,21 @@ int ArcsoftFace::_get_face_feature(MHandle h,
 }
 int ArcsoftFace::_get_faces_features(MHandle h,
                                 vector<ASVLOFFSCREEN>& imgVec,
-                                vector<LPAFD_FSDK_FACERES>& results,
+                                vector<face_xy>& results,
                                 vector<AFR_FSDK_FACEMODEL>& faceMVec)
 {
     int ret = 0;
     for(int i=0; i < imgVec.size(); i++)
     {
-        int idx = _get_the_biggest_face_idx(results.at(i));
+        //int idx = _get_the_biggest_face_idx(&results.at(i));
         AFR_FSDK_FACEINPUT faceXy;
         AFR_FSDK_FACEMODEL LocalFaceModels = { 0 }, targetFaceModels = {0};
 
         faceXy.lOrient = AFR_FSDK_FOC_0;
-        faceXy.rcFace.left = results.at(i)->rcFace[idx].left;
-        faceXy.rcFace.top = results.at(i)->rcFace[idx].top;
-        faceXy.rcFace.right = results.at(i)->rcFace[idx].right;
-        faceXy.rcFace.bottom = results.at(i)->rcFace[idx].bottom;
+        faceXy.rcFace.left = results.at(i).left;
+        faceXy.rcFace.top = results.at(i).top;
+        faceXy.rcFace.right = results.at(i).right;
+        faceXy.rcFace.bottom = results.at(i).bottom;
 
         ret = _get_face_feature(h,&(imgVec.at(i)),&faceXy,&LocalFaceModels);
         targetFaceModels.lFeatureSize = LocalFaceModels.lFeatureSize;

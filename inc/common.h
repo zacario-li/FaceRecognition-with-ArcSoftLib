@@ -38,6 +38,13 @@ typedef struct
     int idx = 0;
     float score = 0.0f;
 }face_idx_score;
+typedef struct
+{
+    int top = 0;
+    int left = 0;
+    int bottom = 0;
+    int right = 0;
+}face_xy;
 /***************************************************************************************
  * function define
 ***************************************************************************************/
