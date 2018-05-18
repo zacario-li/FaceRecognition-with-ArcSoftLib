@@ -8,11 +8,14 @@
 #include <assert.h>
 #include <vector>
 #include <dirent.h>
+#include <iostream>
+#include <fstream>
+
 
 #include "arcsoft_fsdk_face_detection.h"
 #include "arcsoft_fsdk_face_recognition.h"
 #include "merror.h"
-
+#include "CTimer.h"
 #include <opencv2/opencv.hpp>
 #include <opencv2/highgui.hpp>
 

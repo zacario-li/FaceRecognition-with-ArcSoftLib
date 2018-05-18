@@ -60,9 +60,13 @@ int ArcsoftFace::BuildFeatureList(string path)
         return -1;
     }
     //3rd retrive face xy
+    CTimer faceD;
     ret = _get_faces_infos(hEngine_FD,rdstAsvImgVec,rFaceInfoVec);
+    faceD.~CTimer();
     //4th extract features
+    CTimer faceFE;
     ret = _get_faces_features(hEngine_FR,rdstAsvImgVec,rFaceInfoVec,rfaceModelsVec);
+    faceFE.~CTimer();
 
     return ret;
 }
@@ -119,7 +123,7 @@ face_idx_score ArcsoftFace::GetFaceIDScore(Mat& img)
 
 bool ArcsoftFace::_load_faces_imgs(string path)
 {
-    vector<string> names = _list_target_files(path);
+    vector<string> names = list_target_files(path);
     fileNamesVec = names;
     for(int i=0; i<names.size();i++)
     {
@@ -135,7 +139,7 @@ bool ArcsoftFace::_load_faces_imgs(string path)
         }
     }
 }
-vector<string> ArcsoftFace::_list_target_files(string fileFolderPath)
+vector<string> ArcsoftFace::list_target_files(string fileFolderPath)
 {
     struct dirent *ptr;
     DIR *dir;
@@ -185,7 +189,7 @@ bool ArcsoftFace::_convert_mat_to_asvl(vector<Mat>& srcVec,
             goto CVT_MAT_2_ASVL;
         }
         memcpy(inputImg.ppu8Plane[0],tmp.data,tmp.cols*tmp.rows*tmp.channels()*sizeof(uchar));
-
+        tmp.release();
         if (ASVL_PAF_I420 == inputImg.u32PixelArrayFormat) {
             inputImg.pi32Pitch[0] = inputImg.i32Width;
             inputImg.pi32Pitch[1] = inputImg.i32Width/2;
@@ -266,6 +270,9 @@ int ArcsoftFace::_get_faces_features(MHandle h,
     int ret = 0;
     for(int i=0; i < imgVec.size(); i++)
     {
+        float per = (i+0.00001f)/imgVec.size();
+        int p = (int)(per*100.0f);
+        cout<<flush<<'\r'<<" "<<to_string(p)<<"/"<<100<<" "<<string(p/10,'##')<<endl;
         //int idx = _get_the_biggest_face_idx(&results.at(i));
         AFR_FSDK_FACEINPUT faceXy;
         AFR_FSDK_FACEMODEL LocalFaceModels = { 0 }, targetFaceModels = {0};

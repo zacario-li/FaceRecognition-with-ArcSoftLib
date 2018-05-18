@@ -13,6 +13,7 @@ class ArcsoftFace
         int     BuildFeatureList(string path);
         face_idx_score     GetFaceIDScore(Mat& img);
         vector<string>     GetFileNameVec(){return fileNamesVec;};
+        vector<string>     list_target_files(string path);
 
     private:
         MByte*                      pWorkMem_FD = nullptr;
@@ -33,7 +34,6 @@ class ArcsoftFace
 
         //funcs
         bool            _load_faces_imgs(string path);
-        vector<string>  _list_target_files(string path);
         bool            _convert_mat_to_asvl(vector<Mat>& srcVec,
                                         vector<ASVLOFFSCREEN>& targetVec);
         int             _get_face_info(MHandle h,
